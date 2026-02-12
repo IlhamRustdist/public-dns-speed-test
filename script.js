@@ -3,12 +3,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const startBtn = document.getElementById("startBtn");
   const resultsBody = document.getElementById("resultsBody");
   const statusText = document.getElementById("status");
+  const categoryFilter = document.getElementById("categoryFilter");
+  const exportBtn = document.getElementById("exportBtn");
 
-  const TEST_DOMAINS = [
-    "google.com",
-    "youtube.com",
-    "facebook.com"
-  ];
+  const TEST_DOMAINS = ["google.com", "youtube.com", "facebook.com"];
+
+  let latestResults = [];
 
   async function loadDNSList() {
     const res = await fetch("dns-list.json");
@@ -27,22 +27,15 @@ document.addEventListener("DOMContentLoaded", () => {
       const start = performance.now();
 
       try {
-
         let url;
 
         if (server.doh.includes("resolve")) {
-          // Google JSON API
           url = `${server.doh}?name=${testDomain}&type=A`;
-          await fetch(url, {
-            headers: { accept: "application/dns-json" }
-          });
         } else {
-          // Standard JSON-compatible query
           url = `${server.doh}${testDomain}&type=A`;
-          await fetch(url, {
-            headers: { accept: "application/dns-json" }
-          });
         }
+
+        await fetch(url, { headers: { accept: "application/dns-json" } });
 
         const end = performance.now();
         times.push(end - start);
@@ -61,6 +54,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     return {
       name: server.name,
+      category: server.category,
       avg,
       success: `${success}/${TEST_DOMAINS.length}`
     };
@@ -69,16 +63,29 @@ document.addEventListener("DOMContentLoaded", () => {
   function renderResults(results) {
     resultsBody.innerHTML = "";
 
+    if (!results.length) return;
+
+    const fastest = results.find(r => r.avg !== null);
+
     results.forEach((r, index) => {
 
       const row = document.createElement("tr");
 
-      let speedText = "CORS blocked";
+      if (fastest && r.name === fastest.name) {
+        row.classList.add("fastest");
+      }
+
+      let speedText = "Failed";
       if (r.avg !== null) speedText = r.avg.toFixed(2);
+
+      let badge = "";
+      if (fastest && r.name === fastest.name) {
+        badge = `<span class="badge">Recommended</span>`;
+      }
 
       row.innerHTML = `
         <td>${index + 1}</td>
-        <td>${r.name}</td>
+        <td>${r.name} ${badge}</td>
         <td>${speedText}</td>
         <td>${r.success}</td>
       `;
@@ -94,9 +101,15 @@ document.addEventListener("DOMContentLoaded", () => {
     resultsBody.innerHTML = "";
 
     const dnsList = await loadDNSList();
+    const selectedCategory = categoryFilter.value;
+
+    const filtered = selectedCategory === "all"
+      ? dnsList
+      : dnsList.filter(d => d.category === selectedCategory);
+
     const results = [];
 
-    for (const server of dnsList) {
+    for (const server of filtered) {
       const result = await testServer(server);
       results.push(result);
     }
@@ -107,10 +120,29 @@ document.addEventListener("DOMContentLoaded", () => {
       return a.avg - b.avg;
     });
 
+    latestResults = results;
+
     renderResults(results);
 
     statusText.textContent = "Done.";
     startBtn.disabled = false;
+  });
+
+  exportBtn.addEventListener("click", () => {
+    if (!latestResults.length) return;
+
+    const blob = new Blob(
+      [JSON.stringify(latestResults, null, 2)],
+      { type: "application/json" }
+    );
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "dns-speed-results.json";
+    a.click();
+
+    URL.revokeObjectURL(url);
   });
 
 });
