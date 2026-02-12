@@ -4,11 +4,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const resultsBody = document.getElementById("resultsBody");
   const statusText = document.getElementById("status");
 
-  if (!startBtn || !resultsBody) {
-    console.error("Required DOM elements not found.");
-    return;
-  }
-
   const TEST_DOMAINS = [
     "google.com",
     "youtube.com",
@@ -16,13 +11,8 @@ document.addEventListener("DOMContentLoaded", () => {
   ];
 
   async function loadDNSList() {
-    try {
-      const res = await fetch("dns-list.json");
-      return await res.json();
-    } catch (err) {
-      console.error("Failed to load dns-list.json", err);
-      return [];
-    }
+    const res = await fetch("dns-list.json");
+    return await res.json();
   }
 
   async function testServer(server) {
@@ -30,35 +20,42 @@ document.addEventListener("DOMContentLoaded", () => {
     let success = 0;
 
     for (const domain of TEST_DOMAINS) {
+
       const random = Math.random().toString(36).substring(7);
       const testDomain = `${random}.${domain}`;
 
       const start = performance.now();
 
       try {
+
         let url;
 
-        if (server.jsonApi) {
+        if (server.doh.includes("resolve")) {
+          // Google JSON API
           url = `${server.doh}?name=${testDomain}&type=A`;
           await fetch(url, {
             headers: { accept: "application/dns-json" }
           });
         } else {
-          // fallback: skip non-json API for MVP
-          throw new Error("Non-JSON API skipped in MVP");
+          // Standard JSON-compatible query
+          url = `${server.doh}${testDomain}&type=A`;
+          await fetch(url, {
+            headers: { accept: "application/dns-json" }
+          });
         }
 
         const end = performance.now();
         times.push(end - start);
         success++;
-      } catch (err) {
+
+      } catch {
         times.push(null);
       }
     }
 
     const valid = times.filter(t => t !== null);
 
-    const avg = valid.length > 0
+    const avg = valid.length
       ? valid.reduce((a, b) => a + b, 0) / valid.length
       : null;
 
@@ -73,12 +70,11 @@ document.addEventListener("DOMContentLoaded", () => {
     resultsBody.innerHTML = "";
 
     results.forEach((r, index) => {
+
       const row = document.createElement("tr");
 
-      let speedText = "Failed";
-      if (r.avg !== null) {
-        speedText = r.avg.toFixed(2);
-      }
+      let speedText = "CORS blocked";
+      if (r.avg !== null) speedText = r.avg.toFixed(2);
 
       row.innerHTML = `
         <td>${index + 1}</td>
@@ -92,18 +88,12 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   startBtn.addEventListener("click", async () => {
+
     startBtn.disabled = true;
     statusText.textContent = "Testing...";
     resultsBody.innerHTML = "";
 
     const dnsList = await loadDNSList();
-
-    if (!dnsList.length) {
-      statusText.textContent = "DNS list not loaded.";
-      startBtn.disabled = false;
-      return;
-    }
-
     const results = [];
 
     for (const server of dnsList) {
