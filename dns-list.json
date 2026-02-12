@@ -1,14 +1,17 @@
 [
   {
     "name": "Google",
-    "doh": "https://dns.google/resolve"
+    "doh": "https://dns.google/resolve",
+    "category": "standard"
   },
   {
     "name": "Cloudflare",
-    "doh": "https://cloudflare-dns.com/dns-query?name="
+    "doh": "https://cloudflare-dns.com/dns-query?name=",
+    "category": "standard"
   },
   {
     "name": "Quad9",
-    "doh": "https://dns.quad9.net/dns-query?name="
+    "doh": "https://dns.quad9.net/dns-query?name=",
+    "category": "security"
   }
 ]
