@@ -45,3 +45,15 @@ th, td {
 th {
   background: #1e293b;
 }
+.fastest {
+  background: #14532d;
+  font-weight: bold;
+}
+
+.badge {
+  background: #22c55e;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  margin-left: 8px;
+}
