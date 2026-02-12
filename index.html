@@ -1,17 +1,30 @@
-<div class="container">
-  <h1>Public DNS Speed Test</h1>
-  <button id="startTest">Start Test</button>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Public DNS Speed Test</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Public DNS Speed Test</h1>
+    <button id="startBtn">Start Test</button>
+    <p id="status"></p>
 
-  <table id="results">
-    <thead>
-      <tr>
-        <th>Rank</th>
-        <th>Provider</th>
-        <th>Average (ms)</th>
-        <th>Status</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-</div>
-<script src="script.js"></script>
+    <table>
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Provider</th>
+          <th>Average (ms)</th>
+          <th>Success</th>
+        </tr>
+      </thead>
+      <tbody id="resultsBody"></tbody>
+    </table>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
