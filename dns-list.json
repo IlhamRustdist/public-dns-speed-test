@@ -1,1 +1,27 @@
+[
+  {
+    "name": "Cloudflare",
+    "category": "standard",
+    "doh": "https://cloudflare-dns.com/dns-query",
+    "jsonApi": false
+  },
+  {
+    "name": "Google",
+    "category": "standard",
+    "doh": "https://dns.google/resolve",
+    "jsonApi": true
+  },
+  {
+    "name": "AdGuard",
+    "category": "privacy",
+    "doh": "https://dns.adguard-dns.com/dns-query",
+    "jsonApi": false
+  },
+  {
+    "name": "Quad9",
+    "category": "security",
+    "doh": "https://dns.quad9.net/dns-query",
+    "jsonApi": false
+  }
+]
 
