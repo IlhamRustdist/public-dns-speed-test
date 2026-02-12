@@ -17,6 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with DoHSpeedTest. If not, see <http://www.gnu.org/licenses/>.
  */
+const randomSub = Math.random().toString(36).substring(7);
+const domain = `${randomSub}.google.com`;
+
+async function loadDNSList() {
+  const res = await fetch('dns-list.json');
+  return await res.json();
+}
+
 const checkButton = document.getElementById('checkButton');
 const editButton = document.getElementById('editButton');
 const topWebsites = ['google.com', 'youtube.com', 'facebook.com', 'instagram.com', 'chatgpt.com', 'x.com', 'whatsapp.com', 'reddit.com', 'wikipedia.org', 'amazon.com', 'tiktok.com', 'pinterest.com'];
